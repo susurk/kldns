@@ -1,0 +1,29 @@
+name: Build KLDNS
+
+on:
+  push:
+    tags:
+      - 'v*'          # 推送 v1.0 这类 tag 时触发
+  workflow_dispatch:  # 也支持手动点击运行
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Build
+        run: |
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
+          go build -ldflags="-s -w" -o kldns ./cmd/server
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kldns-linux-amd64
+          path: kldns
